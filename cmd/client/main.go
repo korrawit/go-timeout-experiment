@@ -12,7 +12,8 @@ import (
 
 var (
 	mode              = envDefaultString(os.Getenv("MODE"), "DEFAULT_CLIENT")
-	respHeaderTimeout = envDefaultDuration(os.Getenv("RESP_HEADER_TIMEOUT"), time.Duration(3*time.Second))
+	dialTimeout       = envDefaultDuration(os.Getenv("DIAL_TIMEOUT"), 3*time.Second)
+	respHeaderTimeout = envDefaultDuration(os.Getenv("RESP_HEADER_TIMEOUT"), 3*time.Second)
 )
 
 func main() {
@@ -23,7 +24,8 @@ func main() {
 
 	log.Println("Running on:", mode)
 	if mode == "CUSTOM_CLIENT" {
-		log.Println("Timeout:", respHeaderTimeout)
+		log.Println("DIAL_TIMEOUT:", dialTimeout)
+		log.Println("RESP_HEADER_TIMEOUT:", respHeaderTimeout)
 	}
 
 	resp, err := c.Get("http://localhost:8080/api/hello")
@@ -49,7 +51,7 @@ func createHttpClient(mode string) (*http.Client, error) {
 		c = &http.Client{
 			Transport: &http.Transport{
 				Dial: (&net.Dialer{
-					Timeout:   3 * time.Second,
+					Timeout:   dialTimeout,
 					KeepAlive: 30 * time.Second,
 				}).Dial,
 				ResponseHeaderTimeout: respHeaderTimeout,
